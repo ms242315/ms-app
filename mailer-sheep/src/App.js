@@ -135,7 +135,7 @@ function App() {
         本文：<br />
         <FormControl as="textarea" rows={10} cols={100} {...register('body')} />
       </label></p>
-      <Button onClick={() => bleat()}>ブリートする</Button>
+      <Button onClick={() => bleat()}>ブリートする</Button><br />
 
       置き換え：<br />
       <table><tbody>
@@ -150,7 +150,7 @@ function App() {
       </tbody></table>
       <Button onClick={() => repl_append({from: '', key: ''})}>
         置き換えを追加
-      </Button>
+      </Button><br />
       
       チェックリスト：<br />
       <table><tbody>
@@ -163,7 +163,7 @@ function App() {
       </tbody></table>
       <Button onClick={() => chec_append({body: ''})}>
         チェック項目を追加
-      </Button>
+      </Button><br />
 
       <hr />
 
