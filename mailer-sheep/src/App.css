@@ -42,5 +42,6 @@
 }
 
 #sheep {
-  display: inline-block;
+  width: 200px;
+  margin-left: 25px;
 }

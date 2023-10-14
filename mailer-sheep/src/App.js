@@ -104,7 +104,7 @@ function App() {
 
   return (
     <div className="container-fluid">
-      <h1>ChatGPTにメールの記入漏れを判断させる</h1>
+      <h1>Mailer Sheep</h1>
       
       <hr />
 
@@ -131,8 +131,7 @@ function App() {
       <hr />
 
       置き換え：
-      <Button onClick={() => bleat()}>ブリートする</Button>
-      <div id="sheep"></div>
+      <Button id="sheep" onClick={() => bleat()}>本文から生成</Button>
       <br />
       <table><tbody>
         {repl_fields.map((field, index) => (
