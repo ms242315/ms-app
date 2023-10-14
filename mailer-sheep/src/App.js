@@ -5,6 +5,8 @@ import { Button, FormControl } from 'react-bootstrap'
 
 import { useForm, useFieldArray } from "react-hook-form"
 
+import Axios from 'axios';
+
 function App() {
   const { register, handleSubmit, setValue, getValues, control } = useForm({
     defaultValues: {
@@ -32,7 +34,11 @@ function App() {
 
   const bleat = () => {
     const mailBody = getValues('body');
-
+    Axios.post('http://127.0.0.1:5000/bleat', {
+      post_text: mailBody
+    }).then((result) => {
+      console.log(result);
+    });
   };
   
   const onSubmit = (data) => {
