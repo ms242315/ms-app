@@ -128,67 +128,69 @@ function App() {
   };
 
   return (
-    <div class="container-fluid">
+    <div className="container-fluid">
       <h1>ChatGPTにメールの記入漏れを判断させる</h1>
+
       <p><label>
         本文：<br />
         <FormControl as="textarea" rows={10} cols={100} {...register('body')} />
       </label></p>
-      <p>
-        <Button onClick={() => bleat()}>ブリートする</Button>
-      </p>
-      <p>
-        置き換え：<br />
-        <table>
-          {repl_fields.map((field, index) => (
-            <tr key={field.id}>
-              <td><FormControl as="textarea" cols={40} {...register(`repl.${index}.from`)} /></td>
-              <td>=&gt;</td>
-              <td><FormControl as="textarea" cols={40} {...register(`repl.${index}.to`)} /></td>
-              <td><Button onClick={() => repl_remove(index)}>削除</Button></td>
-            </tr>
-          ))}
-          <Button onClick={() => repl_append({from: '', key: ''})}>
-            置き換えを追加
-          </Button>
-        </table>
-      </p>
-      <p>
-        チェックリスト：<br />
-        <table>
-          {chec_fields.map((field, index) => (
-            <tr key={field.id}>
-              <td><FormControl type="text" {...register(`chec.${index}.body`)} /></td>
-              <td><Button onClick={() => chec_remove(index)}>削除</Button></td>
-            </tr>
-          ))}
-          <Button onClick={() => chec_append({body: ''})}>
-            チェック項目を追加
-          </Button>
-        </table>
-      </p>
+      <Button onClick={() => bleat()}>ブリートする</Button>
+
+      置き換え：<br />
+      <table><tbody>
+        {repl_fields.map((field, index) => (
+          <tr key={field.id}>
+            <td><FormControl as="textarea" cols={40} {...register(`repl.${index}.from`)} /></td>
+            <td>=&gt;</td>
+            <td><FormControl as="textarea" cols={40} {...register(`repl.${index}.to`)} /></td>
+            <td><Button onClick={() => repl_remove(index)}>削除</Button></td>
+          </tr>
+        ))}
+      </tbody></table>
+      <Button onClick={() => repl_append({from: '', key: ''})}>
+        置き換えを追加
+      </Button>
+      
+      チェックリスト：<br />
+      <table><tbody>
+        {chec_fields.map((field, index) => (
+          <tr key={field.id}>
+            <td><FormControl type="text" {...register(`chec.${index}.body`)} /></td>
+            <td><Button onClick={() => chec_remove(index)}>削除</Button></td>
+          </tr>
+        ))}
+      </tbody></table>
+      <Button onClick={() => chec_append({body: ''})}>
+        チェック項目を追加
+      </Button>
+
       <hr />
+
+      <h2>ChatGPT</h2>
       <p>
-        <h2>ChatGPT</h2>
-        <p>
-          <label>
-            APIキー：
-            <FormControl type="password" {...register('apikey')} />
-          </label>
-          <Button onClick={handleSubmit(onAPISubmit)}>送信</Button>
-        </p>
+        <label>
+          APIキー：
+          <FormControl type="password" {...register('apikey')} />
+        </label>
+        <Button onClick={handleSubmit(onAPISubmit)}>送信</Button>
+      </p>
+      <p>
         <FormControl as="textarea" rows={10} cols={100} {...register('apiresult')} readOnly />
       </p>
+
       <hr />
+      
+      <h2>ChatGPT</h2>
       <p>
-        <h2>ChatGPT</h2>
-        <p>
-          <Button onClick={handleSubmit(onSubmit)}>出力</Button>　
-          <Button onClick={handleSubmit(onSubmit)}>出力してコピー</Button>
-        </p>
+        <Button onClick={handleSubmit(onSubmit)}>出力</Button>　
+        <Button onClick={handleSubmit(onSubmit)}>出力してコピー</Button>
+      </p>
+      <p>
         <FormControl as="textarea" rows={10} cols={100} {...register('result')} />
       </p>
-      <div class="footer-margin"></div>
+      
+      <div className="footer-margin"></div>
     </div>
   );
 }
