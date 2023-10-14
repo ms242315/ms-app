@@ -30,6 +30,8 @@ function App() {
 
   const bleat = () => {
     const mailBody = getValues('body');
+    const sheep = document.querySelector('#sheep');
+
     Axios.post('http://127.0.0.1:5000/bleat', {
       mailbody: mailBody
     }).then((result) => {
@@ -37,6 +39,13 @@ function App() {
       console.log(propns);
       for (let i = 0; i < propns.length; i++) {
         repl_append({ from: propns[i], to: `<${i}>` });
+      }
+      sheep.innerHTML = '🐏＜' + result.data.sheep_bleat;
+    }).catch((error) => {
+      if (error.response) {
+        sheep.innerHTML = `🚫エラー[${error.response.status}]`;
+      } else {
+        sheep.innerHTML = `🚫エラー[${error.message}]`;
       }
     });
   };
@@ -57,49 +66,6 @@ function App() {
     setValue('result', result);
 
     copyToClipboard(result)
-  };
-
-  const onAPISubmit = async (data) => {
-    const mailBody = getMailBody(data);
-    const checBody = getChecBody(data);
-
-    // let result = "```\n" + mailBody + "\n```\n";
-    // result += "以下の項目のうち、上記の文章に含まれていない項目を挙げてください。\n";
-    // result += checBody;
-
-    let result = "#命令書\n";
-    result += "- 次のメール本文にチェックリストの項目が漏れなく記述されているか教えてください。\n\n";
-    result += "#メール本文\n" + mailBody + "\n";
-    result += "#チェックリスト\n" + checBody;
-    
-    setValue('apiresult', getValues('apikey'));
-
-    // const configuration = new Configuration({
-    //   apiKey: getValues('apikey'),
-    // });
-    // const openai = new OpenAIApi(configuration);
-    // const completion = await openai.createChatCompletion({
-    //   model: "gpt-3.5-turbo",
-    //   messages: [
-    //     {
-    //       role: "user",
-    //       content: result,
-    //     },
-    //   ],
-    // });
-    // const answer = completion.data;
-    // const errors = answer.split(' ');
-
-    // let divresult = "チェック結果：";
-    // let checs = getValues('chec');
-    // for (let i = 0; i < checs.length; i++) {
-    //   let chec = checs[i];
-    //   if (errors.contains(chec)) {
-    //     // エラー
-    //   } else {
-    //     // 正常
-    //   }
-    // }
   };
 
   const getMailBody = (data) => {
@@ -130,29 +96,10 @@ function App() {
   return (
     <div className="container-fluid">
       <h1>ChatGPTにメールの記入漏れを判断させる</h1>
-
-      <label>
-        本文：<br />
-        <FormControl as="textarea" rows={10} cols={100} {...register('body')} />
-      </label>
-      <Button onClick={() => bleat()}>ブリートする</Button><br />
-
-      置き換え：<br />
-      <table><tbody>
-        {repl_fields.map((field, index) => (
-          <tr key={field.id}>
-            <td><FormControl as="textarea" cols={40} {...register(`repl.${index}.from`)} /></td>
-            <td>=&gt;</td>
-            <td><FormControl as="textarea" cols={40} {...register(`repl.${index}.to`)} /></td>
-            <td><Button onClick={() => repl_remove(index)}>削除</Button></td>
-          </tr>
-        ))}
-      </tbody></table>
-      <Button onClick={() => repl_append({from: '', key: ''})}>
-        置き換えを追加
-      </Button><br />
       
-      チェックリスト：<br />
+      <hr />
+
+      伝えたいこと：<br />
       <table><tbody>
         {chec_fields.map((field, index) => (
           <tr key={field.id}>
@@ -162,32 +109,41 @@ function App() {
         ))}
       </tbody></table>
       <Button onClick={() => chec_append({body: ''})}>
-        チェック項目を追加
+        伝えたいことを追加
       </Button><br />
 
       <hr />
 
-      <h2>ChatGPT</h2>
-      <p>
-        <label>
-          APIキー：
-          <FormControl type="password" {...register('apikey')} />
-        </label>
-        <Button onClick={handleSubmit(onAPISubmit)}>送信</Button>
-      </p>
-      <p>
-        <FormControl as="textarea" rows={10} cols={100} {...register('apiresult')} readOnly />
-      </p>
+      <label>
+        本文：<br />
+        <FormControl as="textarea" rows={10} cols={100} {...register('body')} />
+      </label><br />
 
       <hr />
+
+      置き換え：
+      <Button onClick={() => bleat()}>ブリートする</Button>
+      <div id="sheep"></div>
+      <br />
+      <table><tbody>
+        {repl_fields.map((field, index) => (
+          <tr key={field.id}>
+            <td><FormControl as="textarea" cols={60} {...register(`repl.${index}.from`)} /></td>
+            <td>=&gt;</td>
+            <td><FormControl as="textarea" cols={10} {...register(`repl.${index}.to`)} /></td>
+            <td><Button onClick={() => repl_remove(index)}>削除</Button></td>
+          </tr>
+        ))}
+      </tbody></table>
+      <Button onClick={() => repl_append({from: '', key: ''})}>
+        置き換えを追加
+      </Button><br />
       
-      <h2>ChatGPT</h2>
+      <hr />
+
+      <Button onClick={handleSubmit(onSubmit)}>伝えたいことをチェック</Button>
       <p>
-        <Button onClick={handleSubmit(onSubmit)}>出力</Button>　
-        <Button onClick={handleSubmit(onSubmit)}>出力してコピー</Button>
-      </p>
-      <p>
-        <FormControl as="textarea" rows={10} cols={100} {...register('result')} />
+        <FormControl as="textarea" rows={10} cols={100} {...register('result')} readOnly />
       </p>
       
       <div className="footer-margin"></div>

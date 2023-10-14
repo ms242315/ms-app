@@ -40,3 +40,7 @@
 .footer-margin {
   margin-bottom: 512px;
 }
+
+#sheep {
+  display: inline-block;
+}
