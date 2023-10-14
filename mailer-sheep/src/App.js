@@ -11,10 +11,6 @@ function App() {
   const { register, handleSubmit, setValue, getValues, control } = useForm({
     defaultValues: {
       repl: [
-        {
-            from: '',
-            to: ''
-        }
       ],
       chec: [
         {
@@ -37,7 +33,11 @@ function App() {
     Axios.post('http://127.0.0.1:5000/bleat', {
       mailbody: mailBody
     }).then((result) => {
-      console.log(result);
+      const propns = result.data.propns;
+      console.log(propns);
+      for (let i = 0; i < propns.length; i++) {
+        repl_append({ from: propns[i], to: `<${i}>` });
+      }
     });
   };
   
