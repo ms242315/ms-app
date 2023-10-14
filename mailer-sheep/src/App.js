@@ -54,16 +54,25 @@ function App() {
     const mailBody = getMailBody(data);
     const checBody = getChecBody(data);
 
-    // let result = "```\n" + mailBody + "\n```\n";
-    // result += "以下の項目のうち、上記の文章に含まれていない項目を挙げてください。\n";
-    // result += checBody;
-
     let result = "#命令書\n";
     result += "- 次のメール本文にチェックリストの項目が漏れなく記述されているか教えてください。\n\n";
     result += "#メール本文\n" + mailBody + "\n";
     result += "#チェックリスト\n" + checBody;
 
-    setValue('result', result);
+    Axios.post('http://127.0.0.1:5000/check', {
+      mailbody: mailBody
+    }).then((result) => {
+      const check_result = result.data.result;
+      setValue('result', check_result);
+    }).catch((error) => {
+      let error_result;
+      if (error.response) {
+        error_result = `🚫エラー[${error.response.status}]`;
+      } else {
+        error_result = `🚫エラー[${error.message}]`;
+      }
+      setValue('result', error_result);
+    });
 
     copyToClipboard(result)
   };
