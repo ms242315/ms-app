@@ -35,7 +35,7 @@ function App() {
   const bleat = () => {
     const mailBody = getValues('body');
     Axios.post('http://127.0.0.1:5000/bleat', {
-      post_text: mailBody
+      mailbody: mailBody
     }).then((result) => {
       console.log(result);
     });
@@ -131,10 +131,10 @@ function App() {
     <div className="container-fluid">
       <h1>ChatGPTにメールの記入漏れを判断させる</h1>
 
-      <p><label>
+      <label>
         本文：<br />
         <FormControl as="textarea" rows={10} cols={100} {...register('body')} />
-      </label></p>
+      </label>
       <Button onClick={() => bleat()}>ブリートする</Button><br />
 
       置き換え：<br />
