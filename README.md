@@ -2,6 +2,11 @@
 
 # Set up
 
+.env
+```
+OPENAI_API_KEY=[ここにOpenAIのAPIキー]
+```
+
 pip:
 ```
 pip install flask
