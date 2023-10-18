@@ -1,6 +1,7 @@
 from flask import Flask, make_response, request, jsonify
+from markupsafe import escape
 from flask_cors import CORS
-from bleat import bleat, check
+from bleat import bleat, check, generate_mailbody
 from random import choice
 import os
 import openai
@@ -29,6 +30,14 @@ def post_check():
     mailbody = json["mailbody"]
     result = check(mailbody)
     return make_response(jsonify({'result': result}))
+
+@app.route('/generate_mailbody', methods=['POST'])
+def post_generate_mailbody():
+    json = request.get_json()
+    conts = json["conts"]
+    mailbody = escape(generate_mailbody(conts))
+    sheep_bleat = escape(choice(sheep_bleats))
+    return make_response(jsonify({'mailbody': mailbody, 'sheep_bleat': sheep_bleat}))
 
 if __name__ == "__main__":
     app.debug = True

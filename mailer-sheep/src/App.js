@@ -7,26 +7,49 @@ import { useForm, useFieldArray } from "react-hook-form"
 
 import Axios from 'axios';
 
+const server_address = 'http://127.0.0.1:5000';
+
 function App() {
   const { register, handleSubmit, setValue, getValues, control } = useForm({
     defaultValues: {
-      repl: [
-      ],
-      chec: [
+      cont: [
         {
             body: ''
         }
       ],
+      repl: [
+      ],
     }
+  });
+  const { fields: cont_fields, append: cont_append, remove: cont_remove } = useFieldArray({
+    control,
+    name: 'cont'
   });
   const { fields: repl_fields, append: repl_append, remove: repl_remove } = useFieldArray({
     control,
     name: 'repl'
   });
-  const { fields: chec_fields, append: chec_append, remove: chec_remove } = useFieldArray({
-    control,
-    name: 'chec'
-  });
+
+  const generate_mailbody = () => {
+    const conts = getValues('cont');
+    const mailbody_form = document.querySelector('#mailbody');
+    const sheep = document.querySelector('#sheep');
+
+    Axios.post(`${server_address}/generate_mailbody`, {
+      conts: conts
+    }).then((result) => {
+      const mailbody = result.data.mailbody;
+      mailbody_form.innerHTML = mailbody;
+      sheep.innerHTML = '🐏＜' + result.data.sheep_bleat;
+      update_repl_form(conts);
+    }).catch((error) => {
+      if (error.response) {
+        sheep.innerHTML = `🚫エラー[${error.response.status}]`;
+      } else {
+        sheep.innerHTML = `🚫エラー[${error.message}]`;
+      }
+    });
+  };
 
   const bleat = () => {
     const mailBody = getValues('body');
@@ -98,6 +121,35 @@ function App() {
     return checBody;
   }
 
+  const update_repl_form = (conts) => {
+    const new_repls = {}
+    for (let i = 0; i < conts.length; i++) {
+      const cont = conts[i];
+      const matches = cont.body.match(/<[^>]+>/g);
+      if (matches === null) continue;
+
+      for (let j = 0; j < matches.length; j++) {
+        new_repls[matches[j]] = '';
+      }
+    }
+    const repls = getValues('repl');
+    for (let i = 0; i < repls.length; i++) {
+      const pair = repls[i];
+      new_repls[pair.from] = pair.to;
+    }
+    set_repls(new_repls);
+  }
+
+  const set_repls = (new_repls) => {
+    const repls = getValues('repl');
+    for (let i = repls.length - 1; i >= 0; i--) {
+      repl_remove(i);
+    }
+    for (let key in new_repls) {
+      repl_append({from: key, to: new_repls[key]});
+    }
+  }
+
   const copyToClipboard = async (text) => {
     await global.navigator.clipboard.writeText(text);
   };
@@ -110,42 +162,36 @@ function App() {
 
       伝えたいこと：<br />
       <table><tbody>
-        {chec_fields.map((field, index) => (
+        {cont_fields.map((field, index) => (
           <tr key={field.id}>
-            <td><FormControl type="text" {...register(`chec.${index}.body`)} /></td>
-            <td><Button onClick={() => chec_remove(index)}>削除</Button></td>
+            <td><FormControl type="text" {...register(`cont.${index}.body`)} /></td>
+            <td><Button onClick={() => cont_remove(index)}>削除</Button></td>
           </tr>
         ))}
       </tbody></table>
-      <Button onClick={() => chec_append({body: ''})}>
+      <Button onClick={() => cont_append({body: ''})}>
         伝えたいことを追加
       </Button><br />
 
       <hr />
 
-      <label>
-        本文：<br />
-        <FormControl as="textarea" rows={10} cols={100} {...register('body')} />
-      </label><br />
+      本文：
+      <Button id="sheep" onClick={() => generate_mailbody()}>伝えたいことから生成</Button><br />
+      <FormControl id="mailbody" as="textarea" rows={10} cols={100} {...register('body')} />
+      <br />
 
       <hr />
 
-      置き換え：
-      <Button id="sheep" onClick={() => bleat()}>本文から生成</Button>
-      <br />
+      置き換え：<br />
       <table><tbody>
         {repl_fields.map((field, index) => (
           <tr key={field.id}>
-            <td><FormControl as="textarea" cols={60} {...register(`repl.${index}.from`)} /></td>
+            <td><FormControl cols={10} {...register(`repl.${index}.from`)} readOnly /></td>
             <td>=&gt;</td>
-            <td><FormControl as="textarea" cols={10} {...register(`repl.${index}.to`)} /></td>
-            <td><Button onClick={() => repl_remove(index)}>削除</Button></td>
+            <td><FormControl as="textarea" cols={60} {...register(`repl.${index}.to`)} /></td>
           </tr>
         ))}
       </tbody></table>
-      <Button onClick={() => repl_append({from: '', key: ''})}>
-        置き換えを追加
-      </Button><br />
       
       <hr />
 
