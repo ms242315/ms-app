@@ -46,6 +46,7 @@
   margin-left: 25px;
 }
 
-.inline {
+#preset {
   display: inline-block;
+  margin-left: 25px;
 }

@@ -1,4 +1,5 @@
 import './App.css';
+import { cont_presets } from './ContPresets.js'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Button, FormControl, Dropdown } from 'react-bootstrap'
@@ -6,50 +7,13 @@ import { Button, FormControl, Dropdown } from 'react-bootstrap'
 import { useForm, useFieldArray } from "react-hook-form"
 
 import Axios from 'axios';
-
 const server_address = 'http://127.0.0.1:5000';
-
-const cont_presets = [
-  [
-    'うどんを食べに誘う',
-    '友人を名指し',
-    '新しいうどん屋ができた',
-  ],
-  [
-    'お菓子を買ってもらう',
-    '家族を名指し',
-    'コンビニで新商品が発売された',
-    '見かけたらでいい',
-    'お金は返す',
-  ],
-  [
-    '新年のご挨拶',
-    '同僚を名指し',
-  ],
-  [
-    '催し物のお知らせと参加確認',
-    '知り合い全員へ宛てる',
-    '開催日時を表記',
-  ],
-  [
-    '催し物の参加表明',
-    '主催者を名指し',
-    '開催日時を確認した',
-  ],
-  [
-    '催し物の参加辞退',
-    '主催者を名指し',
-  ],
-]
 
 function App() {
   const { register, handleSubmit, setValue, getValues, control } = useForm({
     defaultValues: {
-      cont: [
-        ''
-      ],
-      repl: [
-      ],
+      cont: [''],
+      repl: [],
     }
   });
   const { fields: cont_fields, append: cont_append, remove: cont_remove } = useFieldArray({
@@ -61,10 +25,6 @@ function App() {
     name: 'repl'
   });
 
-  const load_preset = (id) => {
-    setValue('cont', cont_presets[id]);
-  };
-
   const generate_mailbody = () => {
     const conts = getValues('cont');
     const sheep = document.querySelector('#sheep');
@@ -72,7 +32,10 @@ function App() {
     let url = new URL(window.location.href);
     let debug = url.searchParams.get('debug');
     let post_url = `${server_address}/generate_mailbody`;
-    if (debug) { post_url += '/debug' }
+    if (debug) {
+      post_url += '/debug';
+      document.querySelector('#mailbody').disabled = false;
+    }
 
     Axios.post(post_url, {
       conts: conts
@@ -88,54 +51,6 @@ function App() {
       }
     });
   };
-  
-  const onSubmit = (data) => {
-    const mailBody = getMailBody(data);
-    const checBody = getChecBody(data);
-
-    let result = "#命令書\n";
-    result += "- 次のメール本文にチェックリストの項目が漏れなく記述されているか教えてください。\n\n";
-    result += "#メール本文\n" + mailBody + "\n";
-    result += "#チェックリスト\n" + checBody;
-
-    Axios.post('http://127.0.0.1:5000/check', {
-      mailbody: mailBody
-    }).then((result) => {
-      const check_result = result.data.result;
-      setValue('result', check_result);
-    }).catch((error) => {
-      let error_result;
-      if (error.response) {
-        error_result = `🚫エラー[${error.response.status}]`;
-      } else {
-        error_result = `🚫エラー[${error.message}]`;
-      }
-      setValue('result', error_result);
-    });
-
-    copyToClipboard(result)
-  };
-
-  const getMailBody = (data) => {
-    let mailBody = getValues('body');
-    let repls = getValues('repl');
-    for (let i = 0; i < repls.length; i++) {
-      let pair = repls[i];
-      mailBody = mailBody.split(pair.from).join(pair.to);
-    }
-    mailBody = mailBody + "\n";
-    return mailBody;
-  }
-
-  const getChecBody = (data) => {
-    let checBody = "";
-    let checs = getValues('chec');
-    for (let i = 0; i < checs.length; i++) {
-      let chec = checs[i];
-      checBody += "- " + chec + "\n";
-    }
-    return checBody;
-  }
 
   const update_repl_form = (conts) => {
     const new_repls = {}
@@ -154,7 +69,7 @@ function App() {
       new_repls[pair.from] = pair.to;
     }
     set_repls(new_repls);
-  }
+  };
 
   const set_repls = (new_repls) => {
     const repls = getValues('repl');
@@ -164,7 +79,33 @@ function App() {
     for (let key in new_repls) {
       repl_append({from: key, to: new_repls[key]});
     }
-  }
+  };
+  
+  const onSubmit = (data) => {
+    const mailBody = getMailBody(data);
+    setValue('result', mailBody);
+
+    const result = document.querySelector('#result');
+    result.disabled = false;
+  };
+
+  const getMailBody = (data) => {
+    let mailBody = getValues('body');
+    let repls = getValues('repl');
+    if (!mailBody || !repls) return null;
+
+    for (let i = 0; i < repls.length; i++) {
+      let pair = repls[i];
+      mailBody = mailBody.split(pair.from).join(pair.to);
+    }
+    mailBody = mailBody + "\n";
+    return mailBody;
+  };
+
+  const copyResult = () => {
+    const mailBody = getValues('result');
+    if (mailBody) { copyToClipboard(mailBody); }
+  };
 
   const copyToClipboard = async (text) => {
     await global.navigator.clipboard.writeText(text);
@@ -177,7 +118,7 @@ function App() {
       <hr />
 
       伝えたいこと：
-      <Dropdown className='inline'>
+      <Dropdown id='preset'>
         <Dropdown.Toggle>
           プリセット
         </Dropdown.Toggle>
@@ -185,7 +126,7 @@ function App() {
         <Dropdown.Menu>
           {cont_presets.map((preset, index) => {
             return (
-              <Dropdown.Item onClick={() => load_preset(index)}>
+              <Dropdown.Item onClick={() => setValue('cont', cont_presets[index])}>
                 {preset[0]}
               </Dropdown.Item>
             );
@@ -193,7 +134,7 @@ function App() {
         </Dropdown.Menu>
       </Dropdown>
       <br />
-      <table><tbody>
+      <table className="w-100"><tbody>
         {cont_fields.map((field, index) => (
           <tr key={field.id}>
             <td><FormControl type="text" {...register(`cont.${index}`)} /></td>
@@ -202,15 +143,14 @@ function App() {
         ))}
       </tbody></table>
       <Button onClick={() => cont_append('')}>
-        伝えたいことを追加
-      </Button><br />
+        追加
+      </Button>
 
       <hr />
 
       本文：
-      <Button id="sheep" onClick={() => generate_mailbody()}>伝えたいことから生成</Button><br />
+      <Button id="sheep" onClick={() => generate_mailbody()}>生成</Button><br />
       <FormControl id="mailbody" as="textarea" rows={10} cols={100} {...register('body')} disabled />
-      <br />
 
       <hr />
 
@@ -227,9 +167,10 @@ function App() {
       
       <hr />
 
-      <Button onClick={handleSubmit(onSubmit)}>伝えたいことをチェック</Button>
+      <Button onClick={handleSubmit(onSubmit)}>置き換え</Button>
+      <Button onClick={() => copyResult()}>コピー</Button>
       <p>
-        <FormControl as="textarea" rows={10} cols={100} {...register('result')} readOnly />
+        <FormControl id="result" as="textarea" rows={10} cols={100} {...register('result')} readOnly disabled />
       </p>
       
       <div className="footer-margin"></div>
