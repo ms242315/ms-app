@@ -45,3 +45,7 @@
   width: 200px;
   margin-left: 25px;
 }
+
+.inline {
+  display: inline-block;
+}

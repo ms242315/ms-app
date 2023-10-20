@@ -1,7 +1,7 @@
 import './App.css';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Button, FormControl } from 'react-bootstrap'
+import { Button, FormControl, Dropdown } from 'react-bootstrap'
 
 import { useForm, useFieldArray } from "react-hook-form"
 
@@ -9,13 +9,44 @@ import Axios from 'axios';
 
 const server_address = 'http://127.0.0.1:5000';
 
+const cont_presets = [
+  [
+    'うどんを食べに誘う',
+    '友人を名指し',
+    '新しいうどん屋ができた',
+  ],
+  [
+    'お菓子を買ってもらう',
+    '家族を名指し',
+    'コンビニで新商品が発売された',
+    '見かけたらでいい',
+    'お金は返す',
+  ],
+  [
+    '新年のご挨拶',
+    '同僚を名指し',
+  ],
+  [
+    '催し物のお知らせと参加確認',
+    '知り合い全員へ宛てる',
+    '開催日時を表記',
+  ],
+  [
+    '催し物の参加表明',
+    '主催者を名指し',
+    '開催日時を確認した',
+  ],
+  [
+    '催し物の参加辞退',
+    '主催者を名指し',
+  ],
+]
+
 function App() {
   const { register, handleSubmit, setValue, getValues, control } = useForm({
     defaultValues: {
       cont: [
-        {
-            body: ''
-        }
+        ''
       ],
       repl: [
       ],
@@ -30,40 +61,25 @@ function App() {
     name: 'repl'
   });
 
-  const generate_mailbody = () => {
-    const conts = getValues('cont');
-    const mailbody_form = document.querySelector('#mailbody');
-    const sheep = document.querySelector('#sheep');
-
-    Axios.post(`${server_address}/generate_mailbody`, {
-      conts: conts
-    }).then((result) => {
-      const mailbody = result.data.mailbody;
-      mailbody_form.innerHTML = mailbody;
-      sheep.innerHTML = '🐏＜' + result.data.sheep_bleat;
-      update_repl_form(conts);
-    }).catch((error) => {
-      if (error.response) {
-        sheep.innerHTML = `🚫エラー[${error.response.status}]`;
-      } else {
-        sheep.innerHTML = `🚫エラー[${error.message}]`;
-      }
-    });
+  const load_preset = (id) => {
+    setValue('cont', cont_presets[id]);
   };
 
-  const bleat = () => {
-    const mailBody = getValues('body');
+  const generate_mailbody = () => {
+    const conts = getValues('cont');
     const sheep = document.querySelector('#sheep');
 
-    Axios.post('http://127.0.0.1:5000/bleat', {
-      mailbody: mailBody
+    let url = new URL(window.location.href);
+    let debug = url.searchParams.get('debug');
+    let post_url = `${server_address}/generate_mailbody`;
+    if (debug) { post_url += '/debug' }
+
+    Axios.post(post_url, {
+      conts: conts
     }).then((result) => {
-      const propns = result.data.propns;
-      console.log(propns);
-      for (let i = 0; i < propns.length; i++) {
-        repl_append({ from: propns[i], to: `<${i}>` });
-      }
       sheep.innerHTML = '🐏＜' + result.data.sheep_bleat;
+      setValue('body', result.data.mailbody);
+      update_repl_form(conts);
     }).catch((error) => {
       if (error.response) {
         sheep.innerHTML = `🚫エラー[${error.response.status}]`;
@@ -116,7 +132,7 @@ function App() {
     let checs = getValues('chec');
     for (let i = 0; i < checs.length; i++) {
       let chec = checs[i];
-      checBody += "- " + chec.body + "\n";
+      checBody += "- " + chec + "\n";
     }
     return checBody;
   }
@@ -125,7 +141,7 @@ function App() {
     const new_repls = {}
     for (let i = 0; i < conts.length; i++) {
       const cont = conts[i];
-      const matches = cont.body.match(/<[^>]+>/g);
+      const matches = cont.match(/\[[^\]]+\]/g);
       if (matches === null) continue;
 
       for (let j = 0; j < matches.length; j++) {
@@ -160,16 +176,32 @@ function App() {
       
       <hr />
 
-      伝えたいこと：<br />
+      伝えたいこと：
+      <Dropdown className='inline'>
+        <Dropdown.Toggle>
+          プリセット
+        </Dropdown.Toggle>
+  
+        <Dropdown.Menu>
+          {cont_presets.map((preset, index) => {
+            return (
+              <Dropdown.Item onClick={() => load_preset(index)}>
+                {preset[0]}
+              </Dropdown.Item>
+            );
+          })}
+        </Dropdown.Menu>
+      </Dropdown>
+      <br />
       <table><tbody>
         {cont_fields.map((field, index) => (
           <tr key={field.id}>
-            <td><FormControl type="text" {...register(`cont.${index}.body`)} /></td>
+            <td><FormControl type="text" {...register(`cont.${index}`)} /></td>
             <td><Button onClick={() => cont_remove(index)}>削除</Button></td>
           </tr>
         ))}
       </tbody></table>
-      <Button onClick={() => cont_append({body: ''})}>
+      <Button onClick={() => cont_append('')}>
         伝えたいことを追加
       </Button><br />
 
@@ -177,7 +209,7 @@ function App() {
 
       本文：
       <Button id="sheep" onClick={() => generate_mailbody()}>伝えたいことから生成</Button><br />
-      <FormControl id="mailbody" as="textarea" rows={10} cols={100} {...register('body')} />
+      <FormControl id="mailbody" as="textarea" rows={10} cols={100} {...register('body')} disabled />
       <br />
 
       <hr />
