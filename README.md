@@ -2,7 +2,7 @@
 
 # Set up
 
-.env
+Create .env
 ```
 OPENAI_API_KEY=[ここにOpenAIのAPIキー]
 ```

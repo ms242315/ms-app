@@ -43,10 +43,21 @@
 
 #sheep {
   width: 200px;
-  margin-left: 25px;
 }
 
 #preset {
   display: inline-block;
   margin-left: 25px;
+}
+
+#view {
+  display: inline-block;
+  width: 75%;
+  margin-left: 25px;
+  margin-bottom: 10px;
+}
+
+.highlight {
+  display: inline-block;
+  background-color: yellow;
 }
