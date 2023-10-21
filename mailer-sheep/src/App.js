@@ -238,9 +238,9 @@ function App() {
       <table><tbody>
         {repl_fields.map((field, index) => (
           <tr key={field.id}>
-            <td><FormControl cols={10} {...register(`repl.${index}.from`)} readOnly disabled /></td>
+            <td><FormControl cols={20} {...register(`repl.${index}.from`)} readOnly disabled /></td>
             <td>=&gt;</td>
-            <td><FormControl as="textarea" cols={150} {...register(`repl.${index}.to`)} /></td>
+            <td><FormControl as="textarea" cols={100} {...register(`repl.${index}.to`)} /></td>
           </tr>
         ))}
       </tbody></table>
