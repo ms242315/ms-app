@@ -234,7 +234,6 @@ function App() {
 
       <hr />
 
-      置き換え：<br />
       <table><tbody>
         {repl_fields.map((field, index) => (
           <tr key={field.id}>
@@ -247,7 +246,7 @@ function App() {
       
       <hr />
 
-      <Button onClick={handleSubmit(onSubmit)}>置き換え</Button>
+      <Button onClick={handleSubmit(onSubmit)}>ブリートする</Button>
       <Button onClick={() => copyResult()}>コピー</Button>
       <p>
         <FormControl id="result" as="textarea" rows={20} cols={100} {...register('result')} readOnly disabled />
