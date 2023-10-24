@@ -34,7 +34,7 @@ def generate_mail_content(conts):
 
 def generate_mail(conts):
     if openai.api_key == "[ここにOpenAIのAPIキー]":
-        return ("Error", "OpenAI APIキーが設定されていません\nREADME.md を参考に修正するか、URLに「?debug=1」を追加してデバッグモードを試してください。")
+        return ("Error", "OpenAI APIキーが設定されていません\nOpenAI APIキーを .env ファイルに入力するか、URLに「?debug=1」を追加してデバッグモードを試してください。（詳細は README.md をご覧ください）")
         
     content = generate_mail_content(conts)
     response = openai.ChatCompletion.create(
