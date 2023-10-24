@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import './App.css';
 import { cont_presets } from './ContPresets.js'
+import Popup from './Popup.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Button, FormControl, Dropdown, Form } from 'react-bootstrap'
@@ -9,7 +11,9 @@ import { useForm, useFieldArray } from "react-hook-form"
 import Axios from 'axios';
 const server_address = 'http://127.0.0.1:5000';
 
+
 function App() {
+  const [ hide, setHide ] = useState(false)
   const { register, handleSubmit, setValue, getValues, control } = useForm({
     defaultValues: {
       cont: [ {c: ''} ],
@@ -176,6 +180,8 @@ function App() {
 
   return (
     <div className="container-fluid">
+      <Popup hide={hide} setHide={setHide}/>
+
       <h1>Mailer Sheep</h1>
       
       <hr />
