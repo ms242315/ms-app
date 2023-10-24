@@ -120,6 +120,8 @@ function App() {
     setValue('result', '');
     const result = document.querySelector('#result');
     result.disabled = true;
+    const view = document.querySelector('#view');
+    view.disabled = false;
     highlight_table = {};
 
     let matches = mailbody.match(/\[[^\]]+\]/g);
@@ -182,7 +184,7 @@ function App() {
     <div className="container-fluid">
       <Popup hide={hide} setHide={setHide}/>
 
-      <h1>Mailer Sheep</h1>
+      <h1><img src="ms.png" />Mailer Sheep</h1>
       
       <hr />
 
@@ -218,7 +220,7 @@ function App() {
       <hr />
 
       本文：
-      <Form.Control id="view" as="select" onChange={() => set_view(document.querySelector('#view').selectedIndex - 1)}>
+      <Form.Control id="view" as="select" onChange={() => set_view(document.querySelector('#view').selectedIndex - 1)} disabled>
           <option value={-1} key={-1}>
             編集モード
           </option>
