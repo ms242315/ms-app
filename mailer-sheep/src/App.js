@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import { cont_presets } from './ContPresets.js'
 import Popup from './Popup.js';
+import msIcon from "./ms.png";
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Button, FormControl, Dropdown, Form } from 'react-bootstrap'
@@ -184,7 +185,7 @@ function App() {
     <div className="container-fluid">
       <Popup hide={hide} setHide={setHide}/>
 
-      <h1><img src="ms.png" />Mailer Sheep</h1>
+      <h1><img src={msIcon} alt="Icon" />Mailer Sheep</h1>
       
       <hr />
 
