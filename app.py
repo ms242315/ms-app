@@ -1,10 +1,14 @@
-from flask import Flask, make_response, request, jsonify
+from flask import Flask, render_template, make_response, request, jsonify
 from markupsafe import escape
 from flask_cors import CORS
 from bleat import get_sheep_bleat, generate_mail, generate_mail_content, highlight, highlight_content
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='./mailer-sheep/build/static', template_folder='./mailer-sheep/build')
 CORS(app)
+
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 @app.route("/generate_mail", methods=["POST"])
 def post_generate_mail():
