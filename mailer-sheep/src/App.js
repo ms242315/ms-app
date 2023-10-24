@@ -225,6 +225,8 @@ function App() {
             編集モード
           </option>
           {cont_fields.map((field, index) => {
+            if (field.c === null || field.c === '') return '';
+
             return (
               <option value={index} key={field.id}>
                 確認：{field.c}
